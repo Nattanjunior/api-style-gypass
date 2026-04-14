@@ -2,9 +2,12 @@
   "name": "api-style-gypass",
   "version": "1.0.0",
   "description": "",
+  "type": "module",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsup src/server.ts --out-dir build",
+    "dev": "tsx watch src/server.ts",
+    "start": "node build/server.cjs"
   },
   "keywords": [],
   "author": "",
