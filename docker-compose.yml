@@ -1,6 +1,6 @@
 version: '3'
 services:
-  api-gypass-pg :
+  api-gypass-pg:
     image: bitnami/postgresql
     ports:
       - "5432:5432"
