@@ -1,4 +1,4 @@
-# API Style Gypass
+# checkin-service
 
 API REST para gerenciamento de usuários, academias e check-ins, construída com `Node.js`, `TypeScript`, `Fastify`, `Prisma` e `PostgreSQL`.
 
