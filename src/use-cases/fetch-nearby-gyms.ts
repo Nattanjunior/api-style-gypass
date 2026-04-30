@@ -1,5 +1,7 @@
 import { Gym } from "@prisma/client";
 import { GymRepository } from "@/repositories/gym-repository";
+import { redis } from "../lib/redis";
+import { getOrSetCache } from "@/lib/cache";
 
 interface FeatchNearbyGymsUseCaseRequest {
   userLatitude: number;
@@ -7,7 +9,9 @@ interface FeatchNearbyGymsUseCaseRequest {
 }
 
 interface FeatchNearbyGymsUseCaseResponse {
-  gyms: Gym[];
+  status: string
+  gyms: Gym[]
+  cache: string
 }
 
 export class FeatchNearbyGymsUseCase {
@@ -17,16 +21,30 @@ export class FeatchNearbyGymsUseCase {
     userLatitude,
     userLongitude
   }: FeatchNearbyGymsUseCaseRequest): Promise<FeatchNearbyGymsUseCaseResponse> {
+    const cacheKey = `gym-nearby:${userLatitude}:${userLongitude}`;
 
-    const gyms = await this.gymRepository.findManyNearby(
-      {
-        latitude: userLatitude,
-        longitude: userLongitude
-      }
-    );
+    const { data, cache } = await getOrSetCache(
+      cacheKey,
+      async () => {
+        const gyms = await this.gymRepository.findManyNearby(
+          {
+            latitude: userLatitude,
+            longitude: userLongitude
+          }
+        );
+
+        return {
+          status: 'SEARCH SUCCESSFULLY',
+          gyms
+        }
+      },
+      { ttl: 60 * 5 }
+    )
+
 
     return {
-      gyms,
+      ...data,
+      cache
     };
   }
 }
