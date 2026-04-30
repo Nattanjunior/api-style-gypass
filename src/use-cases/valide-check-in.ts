@@ -31,7 +31,7 @@ export class ValidateCheckInUseCase {
 
     if (distanceInMinutesFromCheckInCreation > 20) throw new LateCheckInValidationError()
 
-    checkIn.validetedAt = new Date();
+    checkIn.validatedAt = new Date();
     await this.checkInsRepository.save(checkIn);
 
     return {

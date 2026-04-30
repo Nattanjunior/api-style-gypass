@@ -1,3 +1,4 @@
+import dayjs from "dayjs";
 import { beforeEach, describe, expect, it, vi, afterEach } from "vitest";
 import { InMemoryCheckInRepository } from "../repositories/in-memory/in-memory-check-ins-repository";
 import { ValidateCheckInUseCase } from "./valide-check-in";
@@ -21,15 +22,16 @@ describe("Valide Check in Use Case", () => {
   it("should be able to validate the check in", async () => {
     const createdCheckIn = await checkInRepository.create({
       gym_id: 'gym-01',
-      user_id: 'user-01'
+      user_id: 'user-01',
+      date: dayjs().toDate()
     })
 
     const { checkIn } = await sut.execute({
       checkInId: createdCheckIn.id,
     })
 
-    expect(checkIn.validetedAt).toEqual(expect.any(Date));
-    expect(checkInRepository.items[0]?.validetedAt).toEqual(expect.any(Date));
+    expect(checkIn.validatedAt).toEqual(expect.any(Date));
+    expect(checkInRepository.items[0]?.validatedAt).toEqual(expect.any(Date));
   });
 
 
@@ -47,7 +49,8 @@ describe("Valide Check in Use Case", () => {
 
     const createdCheckIn = await checkInRepository.create({
       gym_id: 'gym-01',
-      user_id: 'user-01'
+      user_id: 'user-01',
+      date: dayjs().toDate()
     })
 
     const twentyOndeMinutesInMs = 1000 * 60 * 21;
@@ -59,6 +62,5 @@ describe("Valide Check in Use Case", () => {
         checkInId: createdCheckIn.id
       })
     ).rejects.toBeInstanceOf(Error)
-
   });
 })
