@@ -1,158 +1,218 @@
-# checkin-service
+# 🏋️ Serviço de Check-in
 
-API REST para gerenciamento de usuários, academias e check-ins, construída com `Node.js`, `TypeScript`, `Fastify`, `Prisma` e `PostgreSQL`.
+API REST para gerenciamento de usuários, academias e check-ins, construída com Node.js, TypeScript, Fastify, Prisma e PostgreSQL.
 
-## Descrição
+---
 
-A aplicação simula o backend de um sistema de check-in em academias. Usuários podem se cadastrar, fazer login, buscar academias, listar academias próximas e registrar check-ins. Algumas ações são restritas a administradores, como cadastrar academias e validar check-ins.
+## 📌 Descrição
 
-## O que a aplicação faz
+Aplicação que simula o backend de um sistema de check-in em academias.
 
-- cadastro de usuários
-- autenticação com `JWT`
-- renovação de token com `refresh token`
-- consulta de perfil do usuário autenticado
-- cadastro de academias
-- busca de academias por nome
-- listagem de academias próximas
-- criação de check-ins
-- histórico de check-ins
-- métricas de check-ins do usuário
-- validação de check-ins por administradores
+Usuários podem:
+- se cadastrar e autenticar
+- buscar academias
+- encontrar academias próximas
+- realizar check-ins com validações de regras de negócio
 
-## Geolocalização
+Além disso, existem funcionalidades administrativas, como cadastro de academias e validação de check-ins.
 
-Um dos pontos centrais do projeto é o uso de latitude e longitude.
+---
 
-A aplicação usa coordenadas geográficas para:
+## ⚙️ Funcionalidades
 
-- buscar academias próximas do usuário
-- validar se o usuário está perto o suficiente da academia para realizar um check-in
+### 👤 Usuários
+- Cadastro de usuários
+- Autenticação com JWT
+- Renovação de token com refresh token
+- Consulta de perfil autenticado
 
-No fluxo de check-in, a API compara a latitude e longitude enviadas pelo usuário com as coordenadas da academia cadastrada. Se a distância estiver acima do limite definido pela regra de negócio, o check-in é bloqueado.
+### 🏋️ Academias
+- Cadastro de academias (admin)
+- Busca por nome
+- Listagem de academias próximas (geolocalização)
 
-## Arquitetura
+### ✅ Check-ins
+- Criação de check-in
+- Histórico de check-ins
+- Métricas de check-ins do usuário
+- Validação de check-ins por administradores
 
-O projeto está organizado em camadas:
+---
 
-- `controllers`: recebem a requisição HTTP, validam entrada e devolvem a resposta
-- `use-cases`: concentram as regras de negócio
-- `repositories`: definem contratos de acesso a dados
-- `repositories/prisma`: implementações reais com banco PostgreSQL
-- `repositories/in-memory`: implementações em memória para testes unitários
-- `prisma`: schema e migrations do banco
+## 🌍 Geolocalização
 
-Fluxo principal:
+Um dos pontos centrais da aplicação é o uso de latitude e longitude.
 
-1. a rota recebe a requisição
-2. o controller valida os dados
-3. o controller chama um caso de uso
-4. o caso de uso aplica a regra de negócio
-5. o repositório acessa o banco via Prisma
+A API utiliza coordenadas geográficas para:
 
-## Tecnologias
+- Buscar academias próximas do usuário
+- Validar se o usuário está fisicamente próximo da academia para realizar o check-in
 
-- `Node.js`
-- `TypeScript`
-- `Fastify`
-- `Prisma`
-- `PostgreSQL`
-- `Zod`
-- `JWT`
-- `Vitest`
-- `Supertest`
-- `Docker Compose`
+📏 Regra de negócio:
+O check-in só é permitido se a distância entre o usuário e a academia estiver dentro de um limite definido.
 
-## Como rodar com Docker
+---
 
-O repositório possui `docker-compose.yml` para subir o PostgreSQL. A API roda localmente na máquina, enquanto o banco roda em container.
+## ⚡ Otimizações de Performance
 
-### Pré-requisitos
+### 🔁 Idempotência (via banco de dados)
 
-- `Docker`
-- `Docker Compose`
-- `Node.js`
-- `npm`
+Problema resolvido:
+- Requisições duplicadas (ex: retries de rede) podem gerar check-ins duplicados
+
+Solução implementada:
+- Uso de **idempotency key**
+- Constraint no banco de dados para garantir unicidade
+
+📌 Resultado:
+- Evita duplicidade de check-ins
+- Garante consistência mesmo em cenários de retry
+
+---
+
+### 🚀 Cache com Redis
+
+Problema:
+- Todas as requisições indo direto para o banco
+
+Solução:
+- Cache inteligente para reduzir carga no banco
+
+Atualmente cacheando:
+- Academias próximas
+- Perfil do usuário
+
+📌 Benefícios:
+- Redução de latência
+- Menor carga no banco de dados
+- Melhor escalabilidade
+
+---
+
+## 🏗️ Arquitetura
+
+O projeto segue uma arquitetura em camadas:
+
+- **Controllers**  
+  Recebem requisições HTTP, validam entrada e retornam resposta
+
+- **Use Cases**  
+  Contêm as regras de negócio da aplicação
+
+- **Repositories**  
+  Definem contratos de acesso a dados
+
+- **Prisma Repositories**  
+  Implementações reais com PostgreSQL
+
+- **In-memory Repositories**  
+  Utilizados para testes unitários
+
+---
+
+### 🔄 Fluxo da aplicação
+
+1. A requisição chega na rota
+2. O controller valida os dados
+3. O controller chama um use case
+4. O use case aplica as regras de negócio
+5. O repositório acessa o banco via Prisma
+
+---
+
+## 🧰 Tecnologias
+
+- Node.js
+- TypeScript
+- Fastify
+- Prisma
+- PostgreSQL
+- Redis
+- Zod
+- JWT
+- Vitest
+- Supertest
+- Docker Compose
+
+---
+
+## 🐳 Como rodar com Docker
+
+O projeto utiliza Docker Compose para subir o banco de dados PostgreSQL.
+
+### 📋 Pré-requisitos
+
+- Docker
+- Docker Compose
+- Node.js
+- npm
+
+---
 
 ### 1. Clonar o repositório
 
-```bash
-git clone <url-do-repositorio>
-cd api-style-gypass
-```
 
-### 2. Instalar dependências
+git clone <url-do-repositorio> 
+cd checkin-service
 
-```bash
+
+2. Instalar dependências
 npm install
-```
 
-### 3. Criar o `.env`
+4. Criar arquivo .env
+cp .env.example .env
 
-No PowerShell:
+Exemplo:
 
-```powershell
-Copy-Item .env.exemple .env
-```
-
-Use um formato de conexão como este:
-
-```env
-NODE_ENV=dev
+`NODE_ENV=dev
 JWT_SECRET=uma_chave_segura
 PORT=3334
-DATABASE_URL="postgresql://docker:docker@localhost:5432/apigyss_bd?schema=public"
-```
+DATABASE_URL="postgresql://docker:docker@localhost:5432/apigyss_bd?schema=public"`
 
-### 4. Subir o banco com Docker
+4. Subir o banco com Docker
+`docker-compose up -d`
 
-```bash
-docker-compose up -d
-```
+6. Rodar migrações
+`npx prisma migrate deploy`
 
-### 5. Rodar as migrations
+8. Rodar a API
+`npm run dev`
 
-```bash
-npx prisma migrate deploy
-```
+A aplicação estará disponível em:
+http://localhost:3334
 
-### 6. Subir a API
+🧪 Testes
+🔹 Testes unitários
+- Testam regras de negócio isoladas
+- Utilizam repositórios em memória
+ `npm run test`
 
-```bash
-npm run dev
-```
+🔹 Testes E2E
+- Testam a API ponta a ponta
+- Utilizam banco PostgreSQL real
 
-Aplicação disponível em:
+📌 Estratégia:
 
-- `http://localhost:3334`
-
-## Testes
-
-O projeto possui dois tipos principais de teste.
-
-### Testes unitários
-
-Executam as regras de negócio isoladamente, usando repositórios em memória.
-
-```bash
-npm run test
-```
-
-### Testes E2E
-
-Testam a API de ponta a ponta, com requisições HTTP reais e banco PostgreSQL.
-
-Para isso, foi criado um `Test Environment` específico para os testes E2E. Ele tem como objetivo criar um banco isolado para cada arquivo de teste E2E, aplicar as migrations no início da execução e apagar esse ambiente ao final dos testes.
-
-Essa estratégia melhora a confiabilidade dos testes, evita compartilhamento de estado entre arquivos, reduz interferências entre execuções e ajuda a manter mais performance e qualidade no processo de validação da aplicação.
-
-```bash
+Banco isolado por arquivo de teste
+Migrações executadas automaticamente
+Ambiente destruído ao final
 npm run test:e2e
-```
 
-### Cobertura
-
-```bash
+📊 Cobertura de testes
 npm run test:coverage
-```
 
+🎯 Próximos passos
+- Observabilidade (logs, métricas, tracing)
+- Testes de carga
+- Deploy em ambiente cloud
+- Avaliação de uso de filas (RabbitMQ/Kafka)
+
+📌 Objetivo do projeto
+Este projeto foi desenvolvido com foco em:
+
+Aplicação de regras de negócio reais
+Boas práticas de arquitetura
+Preparação para cenários de escala
+Simulação de problemas comuns em produção (cache, idempotência, etc)
+
+---
